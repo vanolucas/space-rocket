@@ -1,6 +1,8 @@
-# Space Rocket
+# Space Rocket 🚀
 
 A Web toy where you control a rocket with your keyboard.
+
+Live demo [▶️ here](https://space-rocket.vanolucas.com/).
 
 ## Keyboard controls
 
