@@ -1,0 +1,2 @@
+- [ ] Max velocity should be global rather than by x then y because moving diagonally is faster
+- [ ] Make bullets progressively rotate towards their moving direction
