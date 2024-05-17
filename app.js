@@ -62,6 +62,7 @@ class InputState {
                 this.right = true;
                 break;
             case ' ':
+            case 'e':
                 this.shoot = true;
                 break;
         }
@@ -102,6 +103,7 @@ class InputState {
                 this.right = false;
                 break;
             case ' ':
+            case 'e':
                 this.shoot = false;
                 break;
         }
@@ -159,6 +161,9 @@ const world = new World()
 var count = 0;
 var colorArr = [Math.random() + 0.2, Math.random() + 0.2, Math.random() + 0.2];
 
+const bounceOnFloorAndCeiling = false;
+const bounceOnWalls = true;
+
 // The player's rocket.
 class Rocket {
     constructor(canvas) {
@@ -182,7 +187,7 @@ class Rocket {
         this.reversing = false;
         this.smokeCurl = 20;
         this.smokeSplatRadius = 0.0005;
-        this.bulletInitialVelocity = this.maxVelocity + 10.0;
+        this.bulletInitialVelocity = this.maxVelocity + 20.0;
         this.bulletReloadMs = 150;
         this.img = new Image();
         this.img.src = "assets/rocket.png"
@@ -278,32 +283,63 @@ class Rocket {
         // Update angle based on rotation velocity.
         this.angle = this.angle + this.rotationVelocity;
 
-        // Bounce on ceiling.
-        if (this.y - this.height / 2 < 0.0 && this.yVelocity < 0.0) {
-            this.y = Math.abs(this.y);
-            this.yVelocity = -this.yVelocity;
-            this.angle = -this.angle;
+        // Bounce off floor and ceiling.
+        if (bounceOnFloorAndCeiling) {
+            // Bounce on ceiling.
+            if (this.y - this.height / 2 < 0.0 && this.yVelocity < 0.0) {
+                this.y = Math.abs(this.y);
+                this.yVelocity = -this.yVelocity;
+                this.angle = -this.angle;
+            }
+            // Bounce on floor.
+            else if (this.y + this.height / 2 > frontCanvas.height && this.yVelocity > 0.0) {
+                this.y = frontCanvas.height - Math.abs(this.y - frontCanvas.height);
+                this.yVelocity = -this.yVelocity;
+                this.angle = -this.angle;
+            }
         }
-        // Bounce on ground.
-        else if (this.y + this.height / 2 > frontCanvas.height && this.yVelocity > 0.0) {
-            this.y = frontCanvas.height - Math.abs(this.y - frontCanvas.height);
-            this.yVelocity = -this.yVelocity;
-            this.angle = -this.angle;
+        // Else, re-enter on the opposite side.
+        else {
+            // Exit from ceiling.
+            if (this.y + this.height / 2 < 0.0 && this.yVelocity < 0.0) {
+                // Re-enter from floor.
+                this.y = frontCanvas.height + Math.abs(this.y);
+            }
+            // Exit from floor.
+            else if (this.y - this.height / 2 > frontCanvas.height && this.yVelocity > 0.0) {
+                // Re-enter from ceiling.
+                this.y = 0 - Math.abs(this.y - frontCanvas.height);
+            }
         }
-
-        // Bounce on left wall.
-        if (this.x - this.width / 2 < 0.0 && this.xVelocity < 0.0) {
-            this.x = Math.abs(this.x);
-            this.xVelocity = -this.xVelocity;
-            this.angle = 180 - this.angle;
+        // Bounce off walls.
+        if (bounceOnWalls) {
+            // Bounce on left wall.
+            if (this.x - this.width / 2 < 0.0 && this.xVelocity < 0.0) {
+                this.x = Math.abs(this.x);
+                this.xVelocity = -this.xVelocity;
+                this.angle = 180 - this.angle;
+            }
+            // Bounce on right wall.
+            else if (this.x + this.width / 2 > frontCanvas.width && this.xVelocity > 0.0) {
+                this.x = frontCanvas.width - Math.abs(this.x - frontCanvas.width);
+                this.xVelocity = -this.xVelocity;
+                this.angle = 180 - this.angle;
+            }
         }
-        // Bounce on right wall.
-        else if (this.x + this.width / 2 > frontCanvas.width && this.xVelocity > 0.0) {
-            this.x = frontCanvas.width - Math.abs(this.x - frontCanvas.width);
-            this.xVelocity = -this.xVelocity;
-            this.angle = 180 - this.angle;
+        // Else, re-enter on the opposite side.
+        else {
+            // Exit from left wall.
+            if (this.x + this.width / 2 < 0.0 && this.xVelocity < 0.0) {
+                // Re-enter from right wall.
+                this.x = frontCanvas.width + Math.abs(this.x);
+            }
+            // Exit from right wall.
+            else if (this.x - this.width / 2 > frontCanvas.width && this.xVelocity > 0.0) {
+                // Re-enter from left wall.
+                this.x = 0 - Math.abs(this.x - frontCanvas.width);
+            }
         }
-
+    
         // When shoot key is pressed, shoot bullet.
         if (inputState.shoot) {
             this.shootBullet();
@@ -400,7 +436,7 @@ class Bullet {
         this.velocityFriction = 0.995;
         this.rotationFriction = 0.995;
         this.minVelocity = 0.04;
-        this.maxVelocity = 30.0;
+        this.maxVelocity = 35.0;
         this.lifetimeMs = 15 * 1000;
         this.img = new Image();
         this.img.src = "assets/bullet.png"
@@ -438,7 +474,7 @@ class Bullet {
             this.yVelocity = -this.yVelocity;
             this.angle = (180 - this.angle);
         }
-        // Bounce on ground.
+        // Bounce on floor.
         else if (this.y + this.height / 2 > frontCanvas.height && this.yVelocity > 0.0) {
             this.y = frontCanvas.height - Math.abs(this.y - frontCanvas.height);
             this.yVelocity = -this.yVelocity;

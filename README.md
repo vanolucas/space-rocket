@@ -9,7 +9,7 @@ Live demo [▶️ here](https://space-rocket.vanolucas.com/).
 - **Up/Down arrows**: forward/backward thrust.
 - **Left/Right arrows**: rotate.
 - **W/Z, A/Q, S, D**: move up, left, down, right.
-- **Space**: shoot bullet.
+- **Space** or **E**: shoot bullet.
 
 ## Credits
 
